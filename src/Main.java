@@ -2,8 +2,10 @@
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        Dict d = new Dict();
-        System.out.println(d.addElement("Пупа","Лупа"));
-        System.out.println(d.getElement("Пупа"));
+        WordsDict w = new WordsDict();
+        System.out.println(w.addElement("abcd","1"));
+        System.out.println(w.addElement("abcda","1"));
+        System.out.println(w.addElement("йцук","1"));
+        System.out.println(w.getElements());
     }
 }

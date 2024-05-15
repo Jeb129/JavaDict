@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Dict {
-    private class Element{
+public class Dict implements Serializable {
+    public static class Element implements Serializable{
         private Element(String k, ArrayList<String> val){
             key = k;
             values = new ArrayList<String>(val);
@@ -21,9 +22,17 @@ public class Dict {
             }
             return false;
         }
+        @Override
+        public String toString(){
+            String s = key + ": ";
+            for (String el: values) s+= el + " ";
+            return s;
+        }
+    }
+    public Dict(String keyRx){
+        keyRegex = keyRx;
     }
     String keyRegex;
-    String valueRegex;
     private ArrayList<Element> values = new ArrayList<Element>(0);
     //Поиск
     private Element findElement(String key){
@@ -36,12 +45,15 @@ public class Dict {
         if (el == null) return null;
         return el.values;
     }
+    public ArrayList<Element> getElements(){
+        return new ArrayList<Element>(values);
+    }
     //Добавление
     public boolean addElement(String key,String value){
         if(!key.matches(keyRegex)) return false;
         Element el = findElement(key);
         if(el==null){
-            values.add(new Element(key,value));
+            values.add(new Element(key, value));
             return true;
         }
         else return el.addValue(value);
