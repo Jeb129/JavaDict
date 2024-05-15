@@ -1,9 +1,9 @@
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Dict implements Serializable {
-    public static class Element implements Serializable{
+    private static class Element implements Serializable{
         private Element(String k, ArrayList<String> val){
             key = k;
             values = new ArrayList<String>(val);
@@ -25,7 +25,7 @@ public class Dict implements Serializable {
         @Override
         public String toString(){
             String s = key + ": ";
-            for (String el: values) s+= el + " ";
+            for (String el: values) s+= el + "; ";
             return s;
         }
     }
@@ -45,8 +45,10 @@ public class Dict implements Serializable {
         if (el == null) return null;
         return el.values;
     }
-    public ArrayList<Element> getElements(){
-        return new ArrayList<Element>(values);
+    public void showElements(){
+        for(Element el: values){
+            System.out.print(el);
+        }
     }
     //Добавление
     public boolean addElement(String key,String value){
@@ -64,5 +66,28 @@ public class Dict implements Serializable {
         if (el == null) return false;
         values.remove(el);
         return true;
+    }
+    public void getFromFile(String path){
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+            ArrayList<Element> fileDict = (ArrayList<Element>) ois.readObject();
+            for(Element el: fileDict){
+                for(String val: el.values)
+                    if(!addElement(el.key,val))
+                        System.out.println("Не удалось добавить элемент " + el.key+": "+val);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void loadToFile(String path){
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
+            oos.writeObject(values);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
