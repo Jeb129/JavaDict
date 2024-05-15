@@ -26,7 +26,7 @@ public class Dict implements Serializable {
         public String toString(){
             String s = key + ": ";
             for (String el: values) s += el + "; ";
-            return s;
+            return s.replaceFirst("; *$",";");
         }
     }
     public Dict(String keyRx){
@@ -47,7 +47,7 @@ public class Dict implements Serializable {
     }
     public void showElements(){
         for(Element el: values){
-            System.out.print(el);
+            System.out.println(el);
         }
         System.out.println();
     }
@@ -78,58 +78,44 @@ public class Dict implements Serializable {
         values.clear();
     }
     public void getFromFile(String path){
-        Boolean istxt = path.matches(".*txt$");
         try{
-            if (!istxt) {
-                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
-                ArrayList<Element> fileDict = (ArrayList<Element>) ois.readObject();
-                for (Element el : fileDict) {
-                    for (String val : el.values)
-                        if (!addElement(el.key, val))
-                            System.out.println("Не удалось добавить элемент " + el.key + ": " + val);
+            if (!path.matches(".*txt$"))
+                throw new RuntimeException("Неподдерживаемый формат файла\nПоддерживаемые форматы: txt");
+            BufferedReader reader = new BufferedReader(new FileReader(path));
+            values.clear();
+            String line = reader.readLine();
+            int i = 0;
+            while (line != null){
+                i += 1;
+                if(!line.matches("^"+keyRegex+": .*; *$")){
+                    System.out.println("Не удалось преобразовать строку " + i);
+                }
+                else{
+                    String[] parts = line.split(": ");
+                    String key = parts[0];
+                    String[] vals = parts[1].replaceFirst("; *$","").split("; ");
+                    for (String val: vals) {
+                        if (!addElement(key, val))
+                            System.out.println("Не удалось добавить элемент " + key + ": " + val);
+                    }
+                line = reader.readLine();
                 }
             }
-            else{
-                BufferedReader reader = new BufferedReader(new FileReader(path));
-                String line = reader.readLine();
-                int i = 0;
-                while (line != null){
-                    i += 1;
-                    if(!line.matches("^"+keyRegex+":\s.*;$")){
-                        System.out.println("Не удалось преобразовать строку " + i);
-                    }
-                    else{
-                        String[] parts = line.split(":\s");
-                        String key = parts[0];
-                        String[] values = parts[1].replaceFirst(".*; $","").split("; ");
-                        for (String val: values) {
-                            if (!addElement(key, val))
-                                System.out.println("Не удалось добавить элемент " + key + ": " + val);
-                    }
-                    line = reader.readLine();
-                    }
-                }
                 reader.close();
-            }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
     public void loadToFile(String path){
-        Boolean istxt = path.matches(".*txt$");
         try{
-            if (!istxt) {
-                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
-                oos.writeObject(values);
-            }
-            else{
-                FileWriter fw = new FileWriter(path);
-                for (Element el: values)
-                    fw.write(el.toString());
-                fw.close();
-            }
+            if (!path.matches(".*txt$"))
+                throw new RuntimeException("Неподдерживаемый формат файла\nПоддерживаемые форматы: txt");
+            FileWriter fw = new FileWriter(path);
+            for (Element el: values)
+                fw.write(el+"\n");
+            fw.close();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {

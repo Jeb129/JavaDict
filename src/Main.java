@@ -84,17 +84,29 @@ public class Main {
                     break;
                 }
                 case "4": {
+                    System.out.println("""
+                            Это действие очистит текущий словарь, Введите 1, чтобы продолжить
+                            1. Да, очистить текущий словарь и загрузить новый""");
+                    currentKey = sc.nextLine();
+                    if (!currentKey.equals("1"))
+                        break;
                     filepath = setupPath(true);
-                    if(!filepath.isEmpty())
+                    if(!filepath.isEmpty()) {
                         dict.getFromFile(filepath);
+                        System.out.println("Словарь загружен");
+                    }
+                    else
+                        System.out.println("Файл не найден");
                     break;
                 }
                 case "5": {
                     filepath = setupPath(false);
-                    if(!filepath.isEmpty())
+                    if(!filepath.isEmpty()) {
                         dict.loadToFile(filepath);
+                        System.out.println("Словарь выгружен");
+                    }
                     else
-                        System.out.println("Файл не найден");
+                        System.out.println("Некорректно задан путь к файлу");
                     break;
                 }
                 case "6": {
@@ -105,11 +117,11 @@ public class Main {
             }
         }
     }
-    public static String setupPath(Boolean input){
+    public static String setupPath(boolean input){
         System.out.println("Введите путь до файла со словарем:");
         String fp = sc.nextLine();
         File f = new File(fp);
-        if(f.exists() != input || f.isDirectory()){
+        if(!f.exists() && input || f.isDirectory()){
             return ""; }
         return fp;
     }
