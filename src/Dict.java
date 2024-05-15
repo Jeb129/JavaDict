@@ -25,7 +25,7 @@ public class Dict implements Serializable {
         @Override
         public String toString(){
             String s = key + ": ";
-            for (String el: values) s+= el + "; ";
+            for (String el: values) s += el + "; ";
             return s;
         }
     }
@@ -49,6 +49,7 @@ public class Dict implements Serializable {
         for(Element el: values){
             System.out.print(el);
         }
+        System.out.println();
     }
     //Добавление
     public boolean addElement(String key,String value){
@@ -66,6 +67,15 @@ public class Dict implements Serializable {
         if (el == null) return false;
         values.remove(el);
         return true;
+    }
+    public boolean removeElement(String key,String val){
+        Element el = findElement(key);
+        if (el == null || !el.values.contains(val)) return false;
+        el.values.remove(val);
+        return true;
+    }
+    public void clearDict(){
+        values.clear();
     }
     public void getFromFile(String path){
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
