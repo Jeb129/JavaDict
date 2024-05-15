@@ -78,12 +78,38 @@ public class Dict implements Serializable {
         values.clear();
     }
     public void getFromFile(String path){
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
-            ArrayList<Element> fileDict = (ArrayList<Element>) ois.readObject();
-            for(Element el: fileDict){
-                for(String val: el.values)
-                    if(!addElement(el.key,val))
-                        System.out.println("Не удалось добавить элемент " + el.key+": "+val);
+        Boolean istxt = path.matches(".*txt$");
+        try{
+            if (!istxt) {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
+                ArrayList<Element> fileDict = (ArrayList<Element>) ois.readObject();
+                for (Element el : fileDict) {
+                    for (String val : el.values)
+                        if (!addElement(el.key, val))
+                            System.out.println("Не удалось добавить элемент " + el.key + ": " + val);
+                }
+            }
+            else{
+                BufferedReader reader = new BufferedReader(new FileReader(path));
+                String line = reader.readLine();
+                int i = 0;
+                while (line != null){
+                    i += 1;
+                    if(!line.matches("^"+keyRegex+":\s.*;$")){
+                        System.out.println("Не удалось преобразовать строку " + i);
+                    }
+                    else{
+                        String[] parts = line.split(":\s");
+                        String key = parts[0];
+                        String[] values = parts[1].replaceFirst(".*; $","").split("; ");
+                        for (String val: values) {
+                            if (!addElement(key, val))
+                                System.out.println("Не удалось добавить элемент " + key + ": " + val);
+                    }
+                    line = reader.readLine();
+                    }
+                }
+                reader.close();
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -92,8 +118,18 @@ public class Dict implements Serializable {
         }
     }
     public void loadToFile(String path){
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))) {
-            oos.writeObject(values);
+        Boolean istxt = path.matches(".*txt$");
+        try{
+            if (!istxt) {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+                oos.writeObject(values);
+            }
+            else{
+                FileWriter fw = new FileWriter(path);
+                for (Element el: values)
+                    fw.write(el.toString());
+                fw.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
